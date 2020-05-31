@@ -3,14 +3,13 @@ package com.balves42.daterangepickerdemo.mainactivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.util.Pair
 import com.balves42.daterangepickerdemo.R
 import com.balves42.daterangepickerdemo.mainactivity.utils.CustomMaterialDatePicker
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
-import androidx.core.util.Pair
-
 
 class MainActivity : AppCompatActivity(), MainActivityView {
 
@@ -23,7 +22,6 @@ class MainActivity : AppCompatActivity(), MainActivityView {
 
         mCustomMaterialDatePicker = CustomMaterialDatePicker(
             this,
-            btnOpenCalendar,
             TimeUnit.DAYS.toMillis(maxDays),
             "Selecionar intervalo",
             "Guardar",

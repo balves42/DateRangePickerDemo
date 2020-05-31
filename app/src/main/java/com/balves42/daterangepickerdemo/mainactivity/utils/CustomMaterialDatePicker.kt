@@ -2,10 +2,10 @@ package com.balves42.daterangepickerdemo.mainactivity.utils
 
 import android.content.DialogInterface
 import android.view.View
-import android.view.ViewTreeObserver
-import android.widget.ImageButton
 import androidx.core.util.Pair
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import com.balves42.daterangepickerdemo.R
 import com.balves42.daterangepickerdemo.mainactivity.MainActivityView
 import com.google.android.material.datepicker.CalendarConstraints
@@ -15,7 +15,6 @@ import kotlin.math.abs
 
 class CustomMaterialDatePicker(
     private val mView: MainActivityView,
-    private val mOtherView: View,
     private val mMaxDateRange: Long? = null,
     private val mTitleText: String? = null,
     private val mButtonText: String? = null,
@@ -28,10 +27,7 @@ class CustomMaterialDatePicker(
         null
     private var mMaterialOnDismissListener: DialogInterface.OnDismissListener? = null
     private var mMaterialOnCancelListener: DialogInterface.OnCancelListener? = null
-    private var mCalendarListener: View.OnLayoutChangeListener? = null
-    private var mOtherViewListener: ViewTreeObserver.OnWindowFocusChangeListener? = null
     private var mCalendarConfirmView: View? = null
-    private var mCalendarView: View? = null
     private var mCalendarEnabled = true
 
     init {
@@ -48,6 +44,7 @@ class CustomMaterialDatePicker(
                     fragmentManager!!,
                     mMaterialDatePicker.toString()
                 )
+                addSelectionObserver()
             }
         } catch (e: IllegalStateException) {
             setCalendarEnabled(true)
@@ -61,8 +58,7 @@ class CustomMaterialDatePicker(
         removeDateRangeListeners()
         removeOnDismissListener()
         removeOnCancelListener()
-        removeCalendarListener()
-        removeOtherViewListener()
+        mMaterialDatePicker?.selectionLive?.removeObservers(mView as LifecycleOwner)
     }
 
     private fun enableConfirmView(enable: Boolean) {
@@ -71,9 +67,6 @@ class CustomMaterialDatePicker(
 
     private fun build() {
         setCalendarEnabled(true)
-        initCalendarListener()
-        initOtherViewListener()
-        addOtherViewListener()
         initDateRangeListeners()
         initOnDismissListener()
         initOnCancelListener()
@@ -113,7 +106,6 @@ class CustomMaterialDatePicker(
                     mView.selectedBehavior(Pair(start, end))
                 }
             }
-            removeCalendarListener()
         }
     }
 
@@ -133,37 +125,27 @@ class CustomMaterialDatePicker(
         }
     }
 
-    private fun initOtherViewListener() {
-        mOtherViewListener = ViewTreeObserver.OnWindowFocusChangeListener {
-            mCalendarView = mMaterialDatePicker?.dialog?.findViewById(R.id.mtrl_calendar_frame)
-            mCalendarConfirmView = mMaterialDatePicker?.dialog?.findViewById(R.id.confirm_button)
-            if (mCalendarView != null && mCalendarConfirmView != null) {
-                val inputChangeButton =
-                    mMaterialDatePicker?.dialog?.findViewById<ImageButton>(R.id.mtrl_picker_header_toggle)
-                inputChangeButton?.visibility = View.INVISIBLE
-                removeCalendarListener()
-                addCalendarListener()
-            }
-        }
-    }
-
-    private fun initCalendarListener() {
-        mCalendarListener = View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            mMaxDateRange?.let { maxDateRange ->
-                mMaterialDatePicker?.selection?.first?.let { start ->
-                    mMaterialDatePicker?.selection?.second?.let { end ->
+    private fun addSelectionObserver() {
+        mMaterialDatePicker?.let {
+            if (!it.selectionLive.hasActiveObservers()) {
+                it.selectionLive.observe(mView as LifecycleOwner, Observer { pair ->
+                    val start = pair.first!!
+                    val end = pair.second!!
+                    mMaxDateRange?.let { maxDateRange ->
+                        setCalendarConfirmView()
                         if (abs(end - start) > maxDateRange) {
                             enableConfirmView(false)
                             mView.maxDateRangeBehaviour()
                         }
                     }
                 }
+                )
             }
         }
     }
 
-    private fun addCalendarListener() {
-        mCalendarView?.addOnLayoutChangeListener(mCalendarListener)
+    private fun setCalendarConfirmView() {
+        mCalendarConfirmView = mMaterialDatePicker?.dialog?.findViewById(R.id.confirm_button)
     }
 
     private fun addDateRangeListeners() {
@@ -178,10 +160,6 @@ class CustomMaterialDatePicker(
         mMaterialDatePicker?.addOnCancelListener(mMaterialOnCancelListener)
     }
 
-    private fun addOtherViewListener() {
-        mOtherView.viewTreeObserver.addOnWindowFocusChangeListener(mOtherViewListener)
-    }
-
     private fun removeDateRangeListeners() {
         mMaterialDatePicker?.removeOnPositiveButtonClickListener(mMaterialPositiveListener)
     }
@@ -194,16 +172,7 @@ class CustomMaterialDatePicker(
         mMaterialDatePicker?.removeOnCancelListener(mMaterialOnCancelListener)
     }
 
-    private fun removeCalendarListener() {
-        mCalendarView?.removeOnLayoutChangeListener(mCalendarListener)
-    }
-
-    private fun removeOtherViewListener() {
-        mOtherView.viewTreeObserver.removeOnWindowFocusChangeListener(mOtherViewListener)
-    }
-
     private fun setCalendarEnabled(enable: Boolean) {
         mCalendarEnabled = enable
     }
-
 }
