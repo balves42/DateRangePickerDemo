@@ -49,7 +49,7 @@ override fun maxDateRangeBehaviour() {
 ~~~~~
 override fun onDestroy() {
   super.onDestroy()
-  mCustomMaterialDatePicker.removeListeners()
+  customMaterialDatePicker.removeListeners()
 }
 ~~~~~
 
