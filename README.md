@@ -2,14 +2,15 @@
 Date Range Picker from Material Components with max range and custom text
 
 ### Added features
-#### Customization of fields added in the fork -> [balves42/material-components-android](https://github.com/balves42/material-components-android)
-<img src="https://imgur.com/SPFO3Sh.jpg" title="Custom fields added" /></a>
 
 #### Behaviour of max range exceeded added
-<img src="https://imgur.com/zerFooA.jpg" title="Toast showing max range error" /></a>
+<img src="https://i.imgur.com/dfxrnXq.gif" title="Toast showing max range error" /></a>
 
 1. Show a toast / dialog when the defined max range is exceeded
 2. Disable the confirmation button while the range is invalid
+
+#### Customization of fields added in the fork -> [balves42/material-components-android](https://github.com/balves42/material-components-android)
+<img src="https://imgur.com/SPFO3Sh.jpg" title="Custom fields added" /></a>
 
 #### Before we begin
 Since there wasn't a direct approach to perform this, we needed an external view to be passed to our custom class (in this case, the button that is clicked). A listener is implemented where we check when the focus changes and we have the calendar opened. Then, we will be looking for changes in the calendar (when the range is selected). Using its view id, we will be disabling the button when needed.
